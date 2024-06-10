@@ -1,0 +1,66 @@
+@model WebApp.Pages.IndexModel
+
+<form
+    hx-get="@Url.Page("Index")"
+    hx-trigger="change"
+    hx-target="#results"
+    hx-include="#priceAscending,#priceDescending,#coefficientAscending,#coefficientDescending,#alcAscending,#alcDescending">
+    <div class="form-check-inline">
+        <label class="form-check-label">Odavamad ette</label>
+        <input class="form-check-input"
+               id="priceAscending"
+               type="radio"
+               value="priceLowToHigh"
+               asp-for="SortValue"/>
+    </div>
+
+    <div class="form-check-inline">
+        <label class="form-check-label">Kallimad ette</label>
+
+        <input class="form-check-input"
+               id="priceDescending"
+               type="radio"
+               value="priceHighToLow"
+               asp-for="SortValue"/>
+    </div>
+
+    <div class="form-check-inline">
+        <label class="form-check-label">Madala koefitsendiga ette</label>
+
+        <input class="form-check-input"
+               id="coefficientAscending"
+               type="radio"
+               value="coefficientLowToHigh"
+               asp-for="SortValue"/>
+    </div>
+
+    <div class="form-check-inline">
+        <label class="form-check-label">Kõrge koefitsendiga ette</label>
+
+        <input class="form-check-input"
+               id="coefficientDescending"
+               type="radio"
+               value="coefficientHighToLow"
+               asp-for="SortValue"/>
+    </div>
+
+    <div class="form-check-inline">
+        <label class="form-check-label">Madala alkoholisisaldusega ette</label>
+
+        <input class="form-check-input"
+               type="radio"
+               value="alcLowToHigh"
+               id="alcAscending"
+               asp-for="SortValue"/>
+    </div>
+
+    <div class="form-check-inline">
+        <label class="form-check-label">Kõrge alkoholisisaldusega ette</label>
+        <input class="form-check-input"
+               type="radio"
+               value="alcHighToLow"
+               id="alcDescending"
+               asp-for="SortValue"/>
+    </div>
+
+</form>
