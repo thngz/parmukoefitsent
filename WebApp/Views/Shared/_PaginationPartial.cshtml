@@ -1,0 +1,74 @@
+@model Pages.IndexModel
+
+@{
+    int nextPage = Model.CurrentPage < Model.Products.TotalPages ? Model.CurrentPage + 1 : Model.CurrentPage;
+    int prevPage = Model.CurrentPage - 1;
+}
+
+<ul class="pagination justify-content-center mt-3 flex-wrap ">
+    <li class="page-item">
+        <a class="page-link"
+           hx-target="#results"
+           hx-get="@Url.Page("Index", new { CurrentPage = 1, Model.Query })"
+           hx-swap="innerHTML show:#container:top">
+            Algusesse
+        </a>
+    </li>
+
+    <li class="page-item @(Model.Products.HasPreviousPage ? "" : "disabled")">
+        <a class="page-link"
+           hx-target="#results"
+           hx-get="@Url.Page("Index", new { CurrentPage = prevPage, Model.Query })"
+           hx-swap="innerHTML show:#container:top"
+           aria-disabled="@(Model.Products.HasPreviousPage ? "false" : "true")">
+            Eelmine
+        </a>
+    </li>
+
+    @if (Model.Products.HasPreviousPage)
+    {
+        <li class="page-item">
+            <a class="page-link"
+               hx-target="#results"
+               hx-get="@Url.Page("Index", new { CurrentPage = prevPage, Model.Query })"
+               hx-swap="innerHTML show:#container:top">
+                @prevPage
+            </a>
+        </li>
+    }
+
+    <li class="page-item active">
+        <a class="page-link">@Model.CurrentPage</a>
+    </li>
+
+    @if (Model.Products.HasNextPage)
+    {
+        <li class="page-item">
+            <a class="page-link"
+               hx-target="#results"
+               hx-get="@Url.Page("Index", new { CurrentPage = nextPage, Model.Query })"
+               hx-swap="innerHTML show:#container:top">
+                @nextPage
+            </a>
+        </li>
+    }
+
+    <li class="page-item @(Model.Products.HasNextPage ? "" : "disabled")">
+        <a class="page-link"
+           hx-target="#results"
+           hx-get="@Url.Page("Index", new { CurrentPage = nextPage, Model.Query })"
+           hx-swap="innerHTML show:#container:top"
+           aria-disabled="@(Model.Products.HasNextPage ? "false" : "true")">
+            Järgmine
+        </a>
+    </li>
+
+    <li class="page-item">
+        <a class="page-link"
+           hx-target="#results"
+           hx-get="@Url.Page("Index", new { CurrentPage = Model.Products.TotalPages, Model.Query })"
+           hx-swap="innerHTML show:#container:top">
+            Lõppu (@Model.Products.TotalPages)
+        </a>
+    </li>
+</ul>

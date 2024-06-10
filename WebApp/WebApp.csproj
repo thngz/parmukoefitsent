@@ -1,0 +1,68 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\App.DAL\App.DAL.csproj" />
+      <ProjectReference Include="..\App.Infrastructure\App.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Htmx" Version="1.8.0" />
+      <PackageReference Include="Htmx.TagHelpers" Version="1.7.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.4" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.4">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Pages\Products\Create.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Products\Delete.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Products\Details.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Products\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Products\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Stores\Create.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Stores\Delete.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Stores\Details.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Stores\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Stores\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Shared\_Layout.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Shared\_ValidationScriptsPartial.cshtml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Pages\Products\Create.cshtml" />
+      <UpToDateCheckInput Remove="Pages\Products\Delete.cshtml" />
+      <UpToDateCheckInput Remove="Pages\Products\Details.cshtml" />
+      <UpToDateCheckInput Remove="Pages\Products\Edit.cshtml" />
+      <UpToDateCheckInput Remove="Pages\Products\Index.cshtml" />
+      <UpToDateCheckInput Remove="Pages\Products\Create.cshtml" />
+      <UpToDateCheckInput Remove="Pages\Products\Delete.cshtml" />
+      <UpToDateCheckInput Remove="Pages\Products\Details.cshtml" />
+      <UpToDateCheckInput Remove="Pages\Products\Edit.cshtml" />
+      <UpToDateCheckInput Remove="Pages\Products\Index.cshtml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Views\Shared\PagingPartials\" />
+    </ItemGroup>
+
+</Project>

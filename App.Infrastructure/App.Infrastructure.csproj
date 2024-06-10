@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>App.Infrastructure</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Hangfire.Core" Version="1.8.12" />
+      <PackageReference Include="Selenium.WebDriver" Version="4.21.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\App.DAL\App.DAL.csproj" />
+      <ProjectReference Include="..\App.Models\App.Models.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\App.DAL\App.DAL.csproj" />
+      <ProjectReference Include="..\App.Models\App.Models.csproj" />
+    </ItemGroup>
+
+</Project>

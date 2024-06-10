@@ -1,0 +1,32 @@
+@model Pages.IndexModel
+
+@if (Model.Products is { } products)
+{
+    <div class="row">
+        @foreach (var product in products)
+        {
+            <div class="col-md-4 mb-4">
+
+                <div class="card h-100">
+                    <div class="card-header">
+                        <b>Toote nimetus:</b> @product.Name
+                        <p>Pood: @product.Store.Name</p>
+                    </div>
+                    <ul class="list-group list-group-flush">
+
+                        <li class="list-group-item">Toote hind: @product.Price</li>
+                        <li class="list-group-item">Toote alkoholisisaldus: @product.AlcContent%</li>
+                        <li class="list-group-item">Toote kogus: @product.Amount liitrit</li>
+                        <li class="list-group-item">Parmukoefitsent: @product.Coefficient</li>
+                        <a class="list-group-item-action" href="@product.ProductUrl">Kae toode üle!</a>
+                    </ul>
+                </div>
+            </div>
+        }
+        @await Html.PartialAsync("_PaginationPartial")
+    </div>
+}
+else
+{
+    <p>No results</p>
+}

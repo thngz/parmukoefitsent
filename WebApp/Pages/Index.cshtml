@@ -1,0 +1,28 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <p>Värskeim info Eesti Wabariigi rüübete <a href="http://et.uncyclopedia.info/wiki/Parmukoefitsient">parmukoefitsendi </a>kohta</p>
+
+    <input type="text"
+           asp-for="Query"
+           hx-get="@Url.Page("Index")"
+           hx-target="#results"
+           hx-trigger="keyup changed delay:250ms"
+           hx-indicator="#loading"
+           class="form-control"/>
+
+    <partial name="_ProductSort"/>
+
+    <div class="mt-5" id="container">
+        <h3>Tooted: </h3>
+        <div id="results">
+            @await Html.PartialAsync("_Products")
+        </div>
+    </div>
+
+
+</div>
