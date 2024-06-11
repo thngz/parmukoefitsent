@@ -2,6 +2,7 @@ using System.Diagnostics;
 using App.DAL;
 using App.Infrastructure.Interfaces;
 using App.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
@@ -49,7 +50,7 @@ public class RimiWorker : IScrapeWorker
         var paginationItems = paginationList.FindElements(By.ClassName("pagination__item"));
         var lastPage = int.Parse(paginationItems.ElementAt(paginationItems.Count - 2).Text);
 
-        for (var i = 0; i < lastPage; i++)
+        for (var i = 0; i < 1; i++)
         {
             _logger.LogInformation($"starting {i + 1}th page ");
             var products = GetProductsOnPage();
@@ -68,7 +69,6 @@ public class RimiWorker : IScrapeWorker
             _driver.Navigate().GoToUrl(_url.Url);
         }
 
-        _driver.Quit();
         _context.SaveChanges();
     }
 
@@ -135,7 +135,10 @@ public class RimiWorker : IScrapeWorker
 
     private void UpsertProductIntoDb(Product product)
     {
-        var existingProduct = _context.Products.FirstOrDefault(p => p.ProductUrl == product.ProductUrl);
+        var existingProduct = _context.Products
+            .AsNoTracking()
+            .FirstOrDefault(p => p.ProductUrl == product.ProductUrl);
+        
         if (existingProduct is null)
         {
             _context.Add(product);
@@ -143,6 +146,7 @@ public class RimiWorker : IScrapeWorker
         }
         else
         {
+            product.Id = existingProduct.Id;
             _context.Products.Update(product);
             _logger.LogInformation($"{product.Name} updated in database");
         }
@@ -153,8 +157,15 @@ public class RimiWorker : IScrapeWorker
         var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
         _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
         // Agree with cookies
-        var cookieButton = _driver.FindElement(By.Id("CybotCookiebotDialogBodyLevelButtonLevelOptinDeclineAll"));
-        wait.Until(d => cookieButton.Displayed);
-        cookieButton.Click();
+        try
+        {
+            var cookieButton = _driver.FindElement(By.Id("CybotCookiebotDialogBodyLevelButtonLevelOptinDeclineAll"));
+            wait.Until(d => cookieButton.Displayed);
+            cookieButton.Click();
+        }
+        catch (NoSuchElementException e)
+        {
+            _logger.LogInformation("Didnt find the cookie element");
+        }
     }
 }

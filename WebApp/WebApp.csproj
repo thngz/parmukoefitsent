@@ -8,17 +8,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\App.DAL\App.DAL.csproj" />
       <ProjectReference Include="..\App.Infrastructure\App.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Hangfire" Version="1.8.12" />
+      <PackageReference Include="Hangfire.Dashboard.Basic.Authentication" Version="7.0.1" />
+      <PackageReference Include="Hangfire.InMemory" Version="0.10.0" />
       <PackageReference Include="Htmx" Version="1.8.0" />
       <PackageReference Include="Htmx.TagHelpers" Version="1.7.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4">
@@ -30,6 +27,7 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="Microsoft.Identity.Web" Version="3.0.0-preview1" />
       <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
     </ItemGroup>
 

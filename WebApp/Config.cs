@@ -1,4 +1,5 @@
 using App.Infrastructure.Interfaces;
+using Hangfire;
 
 namespace WebApp;
 
@@ -8,6 +9,9 @@ public static class Config
     {
         using var scope = app.Services.CreateScope();
         var worker = scope.ServiceProvider.GetService<IScrapeWorker>();
-        worker.Work();
+        RecurringJob.AddOrUpdate(
+            "scrape_sites",
+            () => worker.Work(),
+            Cron.Minutely);
     }
 }
