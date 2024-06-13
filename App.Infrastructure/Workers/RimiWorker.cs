@@ -50,7 +50,7 @@ public class RimiWorker : IScrapeWorker
         initialDriver.Quit();
         
         // let each thread work on a range
-        Parallel.For(1, lastPage, new ParallelOptions { MaxDegreeOfParallelism = 1 }, index =>
+        Parallel.For(1, lastPage, new ParallelOptions { MaxDegreeOfParallelism = 4 }, index =>
         {
             var driver = CreateDriver();
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
@@ -58,15 +58,15 @@ public class RimiWorker : IScrapeWorker
             ClickCookieBanner(driver);
             _logger.LogInformation($"starting {index}th page ");
             var products = GetProductsOnPage(driver);
-            // foreach (var product in products)
-            // {
-            //     _logger.LogInformation($"Visiting {product.ProductUrl}");
-            //     driver.Navigate().GoToUrl(product.ProductUrl);
-            //
-            //     CalculateCoefficient(product, driver);
-            //
-            //     _logger.LogInformation($"{product.Name} object made");
-            // }
+            foreach (var product in products)
+            {
+                _logger.LogInformation($"Visiting {product.ProductUrl}");
+                driver.Navigate().GoToUrl(product.ProductUrl);
+            
+                CalculateCoefficient(product, driver);
+            
+                _logger.LogInformation($"{product.Name} object made");
+            }
             UpsertProducts(products); 
             _context.SaveChanges();
             driver.Quit();
