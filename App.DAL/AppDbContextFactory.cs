@@ -9,6 +9,7 @@ public class AppDbContextFactory: IDesignTimeDbContextFactory<AppDbContext>
     {
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
         optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=parmudb;Username=user;Password=password");
+        optionsBuilder.EnableSensitiveDataLogging();
         return new AppDbContext(optionsBuilder.Options);
     }
 }

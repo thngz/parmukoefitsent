@@ -15,7 +15,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString ??
-                      throw new InvalidOperationException("Connection string 'ApplicationDbContext' not found.")));
+                      throw new InvalidOperationException("Connection string 'ApplicationDbContext' not found.")).EnableSensitiveDataLogging());
 
 builder.Services.AddHangfire(conf =>
     conf.UseInMemoryStorage()

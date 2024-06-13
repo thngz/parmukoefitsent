@@ -11,7 +11,7 @@ public static class Config
         var worker = scope.ServiceProvider.GetService<IScrapeWorker>();
         RecurringJob.AddOrUpdate(
             "scrape_sites",
-            () => worker.WorkAsync(),
+            () => worker.Work(),
             Cron.Daily);
     }
 }

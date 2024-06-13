@@ -54,6 +54,9 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ProductUrl")
+                        .IsUnique();
+
                     b.HasIndex("StoreId");
 
                     b.ToTable("Products");
