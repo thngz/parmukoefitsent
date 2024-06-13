@@ -1,10 +1,12 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices.JavaScript;
 using App.DAL;
 using App.Infrastructure.Interfaces;
 using App.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
 
 namespace App.Infrastructure.Workers;
@@ -39,41 +41,48 @@ public class RimiWorker : IScrapeWorker
         _driver = driver;
         _context = context;
         _logger = logger;
-        _store = _context.Stores.FirstOrDefault(s => s.Name == "Rimi");
+        _store = GetStore().Result;
         _driver.Navigate().GoToUrl(_url.Url);
         ClickCookieBanner();
     }
 
-    public void Work()
+    public async Task WorkAsync()
     {
         var paginationList = _driver.FindElement(By.ClassName("pagination__list"));
         var paginationItems = paginationList.FindElements(By.ClassName("pagination__item"));
         var lastPage = int.Parse(paginationItems.ElementAt(paginationItems.Count - 2).Text);
-
+        var _lock = new object();
         for (var i = 0; i < 1; i++)
         {
             _logger.LogInformation($"starting {i + 1}th page ");
             var products = GetProductsOnPage();
-
-            foreach (var product in products)
+            Parallel.ForEach(products, product =>
             {
                 _logger.LogInformation($"Visiting {product.ProductUrl}");
+                lock (_driver)
+                {
+                    _driver.SwitchTo().NewWindow(WindowType.Tab);
+                }
+
                 _driver.Navigate().GoToUrl(product.ProductUrl);
                 CalculateCoefficient(product);
 
                 _logger.LogInformation($"{product.Name} object made");
-                UpsertProductIntoDb(product);
-            }
+                lock (_lock)
+                {
+                    UpsertProductIntoDb(product);
+                }
+            });
 
-            _context.SaveChanges();
+            _context.SaveChangesAsync();
             _driver.Navigate().GoToUrl(_url.Url);
         }
 
-        _context.SaveChanges();
+        _context.SaveChangesAsync();
     }
 
 
-    public List<Product> GetProductsOnPage()
+    private List<Product> GetProductsOnPage()
     {
         var products = new List<Product>();
 
@@ -138,7 +147,7 @@ public class RimiWorker : IScrapeWorker
         var existingProduct = _context.Products
             .AsNoTracking()
             .FirstOrDefault(p => p.ProductUrl == product.ProductUrl);
-        
+
         if (existingProduct is null)
         {
             _context.Add(product);
@@ -167,5 +176,26 @@ public class RimiWorker : IScrapeWorker
         {
             _logger.LogInformation("Didnt find the cookie element");
         }
+    }
+
+    private async Task<Store> GetStore()
+    {
+        var store = _context.Stores.FirstOrDefault(s => s.Name == "Rimi");
+
+        if (store is null)
+        {
+            _context.Stores.Add(new Store { Name = "Rimi" });
+            await _context.SaveChangesAsync();
+            store = _context.Stores.FirstOrDefault(s => s.Name == "Rimi");
+        }
+
+        return store;
+    }
+
+    private IWebDriver CreateDriver()
+    {
+        var options = new FirefoxOptions();
+        options.AddArgument("--headless");
+        return new FirefoxDriver(options);
     }
 }

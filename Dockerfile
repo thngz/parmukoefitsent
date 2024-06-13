@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 as build
+﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
 WORKDIR /app 
 
@@ -22,10 +22,22 @@ COPY WebApp/. ./WebApp/
 WORKDIR /app/WebApp
 RUN dotnet publish -c Release -o out
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 as runtime
+
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 EXPOSE 80
 EXPOSE 8080
 WORKDIR /app
-COPY --from=build /app/WebApp/out ./
 
+RUN apt-get update && apt-get install -y \
+    firefox-esr \
+    wget \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN wget -q https://github.com/mozilla/geckodriver/releases/download/v0.34.0/geckodriver-v0.34.0-linux64.tar.gz \
+    && tar -xzf geckodriver-v0.34.0-linux64.tar.gz \
+    && mv geckodriver /usr/local/bin/ \
+    && rm geckodriver-v0.34.0-linux64.tar.gz
+COPY --from=build /app/WebApp/out ./
 ENTRYPOINT ["dotnet", "WebApp.dll"]

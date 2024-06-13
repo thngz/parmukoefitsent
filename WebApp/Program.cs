@@ -1,17 +1,9 @@
-using System.Configuration;
 using App.DAL;
-using App.Infrastructure;
 using App.Infrastructure.Interfaces;
 using App.Infrastructure.Workers;
-using DAL;
 using Hangfire;
-using Hangfire.Server;
 using HangfireBasicAuthenticationFilter;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Identity.Web;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 using WebApp;
@@ -34,10 +26,6 @@ builder.Services.AddHangfire(conf =>
 
 builder.Services.AddHangfireServer();
 
-var options = new FirefoxOptions();
-options.AddArgument("-headless");
-
-builder.Services.AddSingleton<IWebDriver>(new FirefoxDriver(options));
 builder.Services.AddScoped<IScrapeWorker, RimiWorker>();
 
 var app = builder.Build();
@@ -53,6 +41,12 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions()
         }
     }
 });
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 app.UseWorker();
 

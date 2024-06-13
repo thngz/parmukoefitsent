@@ -4,5 +4,5 @@ namespace App.Infrastructure.Interfaces;
 
 public interface IScrapeWorker
 {
-    public void Work();
+    public Task WorkAsync();
 }

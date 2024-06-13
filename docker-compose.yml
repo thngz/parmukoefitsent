@@ -12,5 +12,16 @@ services:
       - POSTGRES_PASSWORD=password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  
+  app:
+     build: .
+     ports:
+       - 8080:8080
+     restart: on-failure
+     environment:
+        ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=parmudb;Username=user;Password=password"
+        HangFire__Username: "hangfire"
+        HangFire__Password: "password"
+  
 volumes:
   postgres_data:
