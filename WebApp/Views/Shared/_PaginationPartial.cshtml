@@ -9,7 +9,7 @@
     <li class="page-item">
         <a class="page-link"
            hx-target="#results"
-           hx-get="@Url.Page("Index", new { CurrentPage = 1, Model.Query })"
+           hx-get="@Url.Page("Index", new { CurrentPage = 1, Model.Query, Model.SortValue })"
            hx-swap="innerHTML show:#container:top">
             Algusesse
         </a>
@@ -18,7 +18,7 @@
     <li class="page-item @(Model.Products.HasPreviousPage ? "" : "disabled")">
         <a class="page-link"
            hx-target="#results"
-           hx-get="@Url.Page("Index", new { CurrentPage = prevPage, Model.Query })"
+           hx-get="@Url.Page("Index", new { CurrentPage = prevPage, Model.Query, Model.SortValue })"
            hx-swap="innerHTML show:#container:top"
            aria-disabled="@(Model.Products.HasPreviousPage ? "false" : "true")">
             Eelmine
@@ -30,7 +30,7 @@
         <li class="page-item">
             <a class="page-link"
                hx-target="#results"
-               hx-get="@Url.Page("Index", new { CurrentPage = prevPage, Model.Query })"
+               hx-get="@Url.Page("Index", new { CurrentPage = prevPage, Model.Query, Model.SortValue })"
                hx-swap="innerHTML show:#container:top">
                 @prevPage
             </a>
@@ -46,7 +46,7 @@
         <li class="page-item">
             <a class="page-link"
                hx-target="#results"
-               hx-get="@Url.Page("Index", new { CurrentPage = nextPage, Model.Query })"
+               hx-get="@Url.Page("Index", new { CurrentPage = nextPage, Model.Query, Model.SortValue })"
                hx-swap="innerHTML show:#container:top">
                 @nextPage
             </a>
@@ -56,7 +56,7 @@
     <li class="page-item @(Model.Products.HasNextPage ? "" : "disabled")">
         <a class="page-link"
            hx-target="#results"
-           hx-get="@Url.Page("Index", new { CurrentPage = nextPage, Model.Query })"
+           hx-get="@Url.Page("Index", new { CurrentPage = nextPage, Model.Query, Model.SortValue })"
            hx-swap="innerHTML show:#container:top"
            aria-disabled="@(Model.Products.HasNextPage ? "false" : "true")">
             Järgmine
@@ -66,7 +66,7 @@
     <li class="page-item">
         <a class="page-link"
            hx-target="#results"
-           hx-get="@Url.Page("Index", new { CurrentPage = Model.Products.TotalPages, Model.Query })"
+           hx-get="@Url.Page("Index", new { CurrentPage = Model.Products.TotalPages, Model.Query, Model.SortValue })"
            hx-swap="innerHTML show:#container:top">
             Lõppu (@Model.Products.TotalPages)
         </a>

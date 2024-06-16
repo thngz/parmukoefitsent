@@ -50,7 +50,7 @@ public class RimiWorker : IScrapeWorker
         initialDriver.Quit();
         
         // let each thread work on a range
-        Parallel.For(1, lastPage, new ParallelOptions { MaxDegreeOfParallelism = 4 }, index =>
+        Parallel.For(1, lastPage, new ParallelOptions { MaxDegreeOfParallelism = 6 }, index =>
         {
             var driver = CreateDriver();
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
@@ -67,8 +67,12 @@ public class RimiWorker : IScrapeWorker
             
                 _logger.LogInformation($"{product.Name} object made");
             }
-            UpsertProducts(products); 
-            _context.SaveChanges();
+
+            lock (_lock)
+            {
+                UpsertProducts(products); 
+                _context.SaveChanges();
+            }
             driver.Quit();
         });
     }
@@ -174,7 +178,7 @@ public class RimiWorker : IScrapeWorker
     private IWebDriver CreateDriver()
     {
         var options = new FirefoxOptions();
-        // options.AddArgument("--headless");
+        options.AddArgument("--headless");
         return new FirefoxDriver(options);
     }
 }
