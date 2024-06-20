@@ -7,6 +7,9 @@
 <div class="text-center">
     <p>Värskeim info Eesti Wabariigi rüübete <a href="http://et.uncyclopedia.info/wiki/Parmukoefitsient">parmukoefitsendi </a>kohta</p>
 
+    <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Lisainfot lehe kohta
+    </button>
     <input type="text"
            asp-for="Query"
            hx-get
@@ -17,8 +20,7 @@
            class="form-control"/>
 
     <partial name="_ProductSort"/>
-
-
+    <partial name="_ExtraInformationModal"/>
     <div class="mt-5" id="container">
         <div id="results">
             @await Html.PartialAsync("_Products")

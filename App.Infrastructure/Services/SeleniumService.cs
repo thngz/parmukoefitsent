@@ -1,12 +1,13 @@
 using App.DAL;
 using App.Infrastructure.Interfaces;
+using App.Infrastructure.Interfaces.ServiceInterfaces;
 using App.Models;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 
-namespace App.Infrastructure.Behaviors;
+namespace App.Infrastructure.Services;
 
-public class SeleniumBehavior: ISeleniumBehavior
+public class SeleniumService: ISeleniumService
 {
     public IWebDriver CreateDriver()
     {

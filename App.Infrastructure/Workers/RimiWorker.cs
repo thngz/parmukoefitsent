@@ -2,8 +2,8 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using App.DAL;
 using App.Infrastructure.Interfaces;
+using App.Infrastructure.Interfaces.ServiceInterfaces;
 using App.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
@@ -27,24 +27,22 @@ public class RimiWorker : IScrapeWorker
     private readonly RimiUrl _url = new();
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<RimiWorker> _logger;
-    private readonly Store _store;
-    private readonly IProductBehavior _productBehavior;
-    private readonly ISeleniumBehavior _seleniumBehavior;
+    private readonly IProductService _productService;
+    private readonly ISeleniumService _seleniumService;
 
 
-    public RimiWorker(IServiceProvider serviceProvider, ILogger<RimiWorker> logger, IProductBehavior productBehavior,
-        ISeleniumBehavior seleniumBehavior)
+    public RimiWorker(IServiceProvider serviceProvider, ILogger<RimiWorker> logger, IProductService productService,
+        ISeleniumService seleniumService)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
-        _productBehavior = productBehavior;
-        _seleniumBehavior = seleniumBehavior;
-        _store = GetStore().Result;
+        _productService = productService;
+        _seleniumService = seleniumService;
     }
 
     public void Work(int maxThreadCount)
     {
-        var initialDriver = _seleniumBehavior.CreateDriver();
+        var initialDriver = _seleniumService.CreateDriver();
         initialDriver.Navigate().GoToUrl(_url.GetUrl(1));
         var paginationList = initialDriver.FindElement(By.ClassName("pagination__list"));
         var paginationItems = paginationList.FindElements(By.ClassName("pagination__item"));
@@ -59,38 +57,45 @@ public class RimiWorker : IScrapeWorker
 
     private void StartProcessingPages(int index)
     {
-        var driver = _seleniumBehavior.CreateDriver();
+        var driver = _seleniumService.CreateDriver();
         driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
         driver.Navigate().GoToUrl(_url.GetUrl(index));
         ClickCookieBanner(driver);
         _logger.LogInformation($"starting {index}th page ");
-        var products = _productBehavior.GetProductsOnPage(".product-grid__item", CreateInitialProduct, driver);
 
         using (var scope = _serviceProvider.CreateScope())
         {
             var ctx = scope.ServiceProvider.GetService<AppDbContext>();
             Trace.Assert(ctx is not null);
-            
-            _logger.LogInformation($"Enumerating products not in db");
-            foreach (var product in products)
+
+            var store = _productService.GetStoreForProduct("Rimi", ctx);
+            var productsOnPage =
+                _productService.GetProductsOnPage(".product-grid__item", CreateProduct, driver, store);
+            var urls = ctx.Products.Select(x => x.ProductUrl);
+            var existingUrls =
+                new HashSet<string>(ctx.Products.Where(x => urls.Contains(x.ProductUrl)).Select(x => x.ProductUrl));
+            var dbProducts = new List<Product>();
+
+            foreach (var product in productsOnPage)
             {
-                driver.Navigate().GoToUrl(product.ProductUrl);
-                GetAdditionalData(product, driver);
+                if (!existingUrls.Contains(product.ProductUrl))
+                {
+                    _logger.LogInformation($"Navigating to {product.ProductUrl}");
+                    driver.Navigate().GoToUrl(product.ProductUrl);
+                    SetProductDetails(product, driver);
+                }
 
-                _logger.LogInformation($"{product.Name} additional data gotten");
-
-                product.Coefficient = Math.Round(product.AlcContent * product.Amount / product.Price, 2);
-                _productBehavior.InsertProduct(product, ctx);
+                dbProducts.Add(product);
             }
 
-            ctx.SaveChanges();
+            _productService.UpsertProducts(dbProducts, ctx);
         }
 
         driver.Quit();
     }
 
 
-    private Product CreateInitialProduct(IWebElement productData)
+    private Product CreateProduct(IWebElement productData, Store store)
     {
         var url = productData.FindElement(By.ClassName("card__url")).GetAttribute("href");
 
@@ -102,8 +107,8 @@ public class RimiWorker : IScrapeWorker
         var product = new Product
         {
             Name = productName,
-            Store = _store,
-            StoreId = _store.Id,
+            Store = store,
+            StoreId = store.Id,
             Price = decimal.Parse($"{priceEur}.{priceCents}"),
             ProductUrl = url
         };
@@ -111,7 +116,7 @@ public class RimiWorker : IScrapeWorker
         return product;
     }
 
-    private void GetAdditionalData(Product product, IWebDriver driver)
+    private void SetProductDetails(Product product, IWebDriver driver)
     {
         var productDetails = new ReadOnlyCollection<IWebElement>(new List<IWebElement>());
         try
@@ -122,7 +127,7 @@ public class RimiWorker : IScrapeWorker
         {
             _logger.LogError("Trying again!");
             driver.Navigate().Refresh();
-            GetAdditionalData(product, driver);
+            SetProductDetails(product, driver);
         }
 
         foreach (var productDetail in productDetails)
@@ -139,6 +144,8 @@ public class RimiWorker : IScrapeWorker
                 var vol = productDetail.FindElement(By.ClassName("text")).Text.Split()[0].TrimEnd('%');
                 product.AlcContent = decimal.Parse(vol);
             }
+
+            product.Coefficient = Math.Round(product.AlcContent * product.Amount / product.Price, 2);
         }
     }
 
@@ -149,32 +156,12 @@ public class RimiWorker : IScrapeWorker
         try
         {
             var cookieButton = driver.FindElement(By.Id("CybotCookiebotDialogBodyLevelButtonLevelOptinDeclineAll"));
-            wait.Until(d => cookieButton.Displayed);
+            wait.Until(_ => cookieButton.Displayed);
             cookieButton.Click();
         }
         catch (NoSuchElementException)
         {
             _logger.LogInformation("Didnt find the cookie element");
         }
-    }
-
-    private async Task<Store> GetStore()
-    {
-        using var scope = _serviceProvider.CreateScope();
-
-        var ctx = scope.ServiceProvider.GetService<AppDbContext>();
-
-        Trace.Assert(ctx is not null);
-        var store = ctx.Stores.FirstOrDefault(s => s.Name == "Rimi");
-
-        if (store is null)
-        {
-            ctx.Stores.Add(new Store { Name = "Rimi" });
-            await ctx.SaveChangesAsync();
-            store = ctx.Stores.FirstOrDefault(s => s.Name == "Rimi");
-        }
-
-        Trace.Assert(store is not null);
-        return store;
     }
 }

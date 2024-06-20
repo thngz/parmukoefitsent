@@ -1,6 +1,7 @@
 using System.Diagnostics;
-using App.Infrastructure.Behaviors;
 using App.Infrastructure.Interfaces;
+using App.Infrastructure.Interfaces.ServiceInterfaces;
+using App.Infrastructure.Services;
 using App.Infrastructure.Workers;
 using Hangfire;
 
@@ -35,8 +36,8 @@ public static class Config
 
     public static void AddDefaultBehaviors(this IServiceCollection services)
     {
-        services.AddScoped<ISeleniumBehavior, SeleniumBehavior>();
-        services.AddScoped<IProductBehavior, ProductBehavior>();
+        services.AddScoped<ISeleniumService, SeleniumService>();
+        services.AddScoped<IProductService, ProductService>();
     }
 
     public static void AddWorkers(this IServiceCollection services)
