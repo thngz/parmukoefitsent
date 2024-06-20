@@ -59,8 +59,4 @@
       <UpToDateCheckInput Remove="Pages\Products\Index.cshtml" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Views\Shared\PagingPartials\" />
-    </ItemGroup>
-
 </Project>

@@ -2,6 +2,16 @@
 
 @if (Model.Products is { } products)
 {
+    <div class="container">
+        <h3>Tooted: </h3>
+
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Näita tooteid: @Model.PaginationSize
+            </button>
+            <partial name="_PaginationDropdownPartial"/>
+        </div>
+    </div>
     <div class="row">
         @foreach (var product in products)
         {

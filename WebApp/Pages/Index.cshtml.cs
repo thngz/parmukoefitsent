@@ -26,6 +26,8 @@ public class IndexModel : PageModel
 
     [BindProperty(SupportsGet = true)] public int CurrentPage { get; set; }
 
+    [BindProperty(SupportsGet = true)] public int PaginationSize { get; set; } = 10;
+    
     public async Task<IActionResult> OnGet()
     {
         CurrentPage = CurrentPage == 0 ? 1 : CurrentPage;
@@ -66,10 +68,11 @@ public class IndexModel : PageModel
             };
         }
 
-        Products = await PaginatedList<Product>.CreateAsync(ordered, CurrentPage, 10);
+        Products = await PaginatedList<Product>.CreateAsync(ordered.AsNoTracking(), CurrentPage, PaginationSize);
 
         if (!Request.IsHtmx())
             return Page();
         return Partial("_Products", this);
     }
+    
 }

@@ -1,11 +1,7 @@
 using App.DAL;
-using App.Infrastructure.Interfaces;
-using App.Infrastructure.Workers;
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using Microsoft.EntityFrameworkCore;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Firefox;
 using WebApp;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,16 +13,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString ??
                       throw new InvalidOperationException("Connection string 'ApplicationDbContext' not found.")).EnableSensitiveDataLogging());
 
-builder.Services.AddHangfire(conf =>
-    conf.UseInMemoryStorage()
-        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-        .UseSimpleAssemblyNameTypeSerializer()
-        .UseRecommendedSerializerSettings()
-);
-
-builder.Services.AddHangfireServer();
-
-builder.Services.AddScoped<IScrapeWorker, RimiWorker>();
+builder.Services.AddDefaultBehaviors();
+builder.Services.AddConfiguredHangfire();
+builder.Services.AddWorkers();
 
 var app = builder.Build();
 

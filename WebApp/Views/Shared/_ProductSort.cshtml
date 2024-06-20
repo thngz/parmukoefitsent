@@ -1,7 +1,8 @@
 @model WebApp.Pages.IndexModel
 
 <form
-    hx-get="@Url.Page("Index")"
+    hx-get
+    hx-page="Index"
     hx-trigger="change"
     hx-target="#results"
     hx-include="#priceAscending,#priceDescending,#coefficientAscending,#coefficientDescending,#alcAscending,#alcDescending">

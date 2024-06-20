@@ -9,7 +9,12 @@
     <li class="page-item">
         <a class="page-link"
            hx-target="#results"
-           hx-get="@Url.Page("Index", new { CurrentPage = 1, Model.Query, Model.SortValue })"
+           hx-get
+           hx-page="Index"
+           hx-route-query="@Model.Query"
+           hx-route-sortvalue="@Model.SortValue"
+           hx-route-paginationsize="@Model.PaginationSize"
+           hx-route-currentpage="1"
            hx-swap="innerHTML show:#container:top">
             Algusesse
         </a>
@@ -18,7 +23,12 @@
     <li class="page-item @(Model.Products.HasPreviousPage ? "" : "disabled")">
         <a class="page-link"
            hx-target="#results"
-           hx-get="@Url.Page("Index", new { CurrentPage = prevPage, Model.Query, Model.SortValue })"
+           hx-get
+           hx-page="Index"
+           hx-route-query="@Model.Query"
+           hx-route-sortvalue="@Model.SortValue"
+           hx-route-paginationsize="@Model.PaginationSize"
+           hx-route-currentpage="@prevPage"
            hx-swap="innerHTML show:#container:top"
            aria-disabled="@(Model.Products.HasPreviousPage ? "false" : "true")">
             Eelmine
@@ -29,8 +39,13 @@
     {
         <li class="page-item">
             <a class="page-link"
+               hx-get
+               hx-page="Index"
                hx-target="#results"
-               hx-get="@Url.Page("Index", new { CurrentPage = prevPage, Model.Query, Model.SortValue })"
+               hx-route-query="@Model.Query"
+               hx-route-sortvalue="@Model.SortValue"
+               hx-route-paginationsize="@Model.PaginationSize"
+               hx-route-currentpage="@prevPage"
                hx-swap="innerHTML show:#container:top">
                 @prevPage
             </a>
@@ -45,8 +60,13 @@
     {
         <li class="page-item">
             <a class="page-link"
+               hx-get
+               hx-page="Index"
                hx-target="#results"
-               hx-get="@Url.Page("Index", new { CurrentPage = nextPage, Model.Query, Model.SortValue })"
+               hx-route-currentpage="@nextPage"
+               hx-route-query="@Model.Query"
+               hx-route-sortvalue="@Model.SortValue"
+               hx-route-paginationsize="@Model.PaginationSize"
                hx-swap="innerHTML show:#container:top">
                 @nextPage
             </a>
@@ -55,8 +75,13 @@
 
     <li class="page-item @(Model.Products.HasNextPage ? "" : "disabled")">
         <a class="page-link"
+           hx-get
+           hx-page="Index"
            hx-target="#results"
-           hx-get="@Url.Page("Index", new { CurrentPage = nextPage, Model.Query, Model.SortValue })"
+           hx-route-query="@Model.Query"
+           hx-route-sortvalue="@Model.SortValue"
+           hx-route-paginationsize="@Model.PaginationSize"
+           hx-route-currentpage="@nextPage"
            hx-swap="innerHTML show:#container:top"
            aria-disabled="@(Model.Products.HasNextPage ? "false" : "true")">
             Järgmine
@@ -65,8 +90,13 @@
 
     <li class="page-item">
         <a class="page-link"
+           hx-get
+           hx-page="Index"
            hx-target="#results"
-           hx-get="@Url.Page("Index", new { CurrentPage = Model.Products.TotalPages, Model.Query, Model.SortValue })"
+           hx-route-query="@Model.Query"
+           hx-route-sortvalue="@Model.SortValue"
+           hx-route-paginationsize="@Model.PaginationSize"
+           hx-route-currentpage="@Model.Products.TotalPages"
            hx-swap="innerHTML show:#container:top">
             Lõppu (@Model.Products.TotalPages)
         </a>

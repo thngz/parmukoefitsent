@@ -9,7 +9,8 @@
 
     <input type="text"
            asp-for="Query"
-           hx-get="@Url.Page("Index")"
+           hx-get
+           hx-page="Index"
            hx-target="#results"
            hx-trigger="keyup changed delay:250ms"
            hx-indicator="#loading"
@@ -17,12 +18,10 @@
 
     <partial name="_ProductSort"/>
 
+
     <div class="mt-5" id="container">
-        <h3>Tooted: </h3>
         <div id="results">
             @await Html.PartialAsync("_Products")
         </div>
     </div>
-
-
 </div>

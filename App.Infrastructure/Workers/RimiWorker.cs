@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Runtime.InteropServices.JavaScript;
 using App.DAL;
 using App.Infrastructure.Interfaces;
 using App.Models;
@@ -8,14 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
 
 namespace App.Infrastructure.Workers;
 
 public class RimiUrl
 {
-    private int _currentPage = 1;
     private int _pageSize = 80;
     private const string BaseUrl = "https://www.rimi.ee/epood/ee/tooted/alkohol/c/SH-1?";
 
@@ -31,17 +28,23 @@ public class RimiWorker : IScrapeWorker
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<RimiWorker> _logger;
     private readonly Store _store;
+    private readonly IProductBehavior _productBehavior;
+    private readonly ISeleniumBehavior _seleniumBehavior;
 
-    public RimiWorker(IServiceProvider serviceProvider, ILogger<RimiWorker> logger)
+
+    public RimiWorker(IServiceProvider serviceProvider, ILogger<RimiWorker> logger, IProductBehavior productBehavior,
+        ISeleniumBehavior seleniumBehavior)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
+        _productBehavior = productBehavior;
+        _seleniumBehavior = seleniumBehavior;
         _store = GetStore().Result;
     }
 
-    public void Work()
+    public void Work(int maxThreadCount)
     {
-        var initialDriver = CreateDriver();
+        var initialDriver = _seleniumBehavior.CreateDriver();
         initialDriver.Navigate().GoToUrl(_url.GetUrl(1));
         var paginationList = initialDriver.FindElement(By.ClassName("pagination__list"));
         var paginationItems = paginationList.FindElements(By.ClassName("pagination__item"));
@@ -50,57 +53,42 @@ public class RimiWorker : IScrapeWorker
 
         Parallel.For(1,
             lastPage,
-            new ParallelOptions { MaxDegreeOfParallelism = 6 },
+            new ParallelOptions { MaxDegreeOfParallelism = maxThreadCount },
             StartProcessingPages);
     }
 
     private void StartProcessingPages(int index)
     {
-        var driver = CreateDriver();
+        var driver = _seleniumBehavior.CreateDriver();
         driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
         driver.Navigate().GoToUrl(_url.GetUrl(index));
         ClickCookieBanner(driver);
         _logger.LogInformation($"starting {index}th page ");
-        var products = GetProductsOnPage(driver);
+        var products = _productBehavior.GetProductsOnPage(".product-grid__item", CreateInitialProduct, driver);
 
         using (var scope = _serviceProvider.CreateScope())
         {
             var ctx = scope.ServiceProvider.GetService<AppDbContext>();
+            Trace.Assert(ctx is not null);
+            
+            _logger.LogInformation($"Enumerating products not in db");
             foreach (var product in products)
             {
-                _logger.LogInformation($"Visiting {product.ProductUrl}");
-                var existing = ctx.Products.FirstOrDefault(p => p.ProductUrl == product.ProductUrl);
+                driver.Navigate().GoToUrl(product.ProductUrl);
+                GetAdditionalData(product, driver);
 
-                if (existing is null)
-                {
-                    driver.Navigate().GoToUrl(product.ProductUrl);
-                    GetAdditionalData(product, driver);
-
-                    _logger.LogInformation($"{product.Name} coefficient calculated");
-                }
-                else
-                {
-                    product.AlcContent = existing.AlcContent;
-                    product.Amount = existing.Amount;
-                }
+                _logger.LogInformation($"{product.Name} additional data gotten");
 
                 product.Coefficient = Math.Round(product.AlcContent * product.Amount / product.Price, 2);
+                _productBehavior.InsertProduct(product, ctx);
             }
 
-
-            UpsertProducts(products, ctx);
             ctx.SaveChanges();
         }
 
         driver.Quit();
     }
 
-
-    private List<Product> GetProductsOnPage(IWebDriver driver)
-    {
-        var productsOnPage = driver.FindElements(By.CssSelector(".product-grid__item"));
-        return productsOnPage.Select(CreateInitialProduct).ToList();
-    }
 
     private Product CreateInitialProduct(IWebElement productData)
     {
@@ -130,7 +118,7 @@ public class RimiWorker : IScrapeWorker
         {
             productDetails = driver.FindElement(By.ClassName("list")).FindElements(By.ClassName("item"));
         }
-        catch (NoSuchElementException e)
+        catch (NoSuchElementException)
         {
             _logger.LogError("Trying again!");
             driver.Navigate().Refresh();
@@ -154,13 +142,6 @@ public class RimiWorker : IScrapeWorker
         }
     }
 
-
-    private void UpsertProducts(IEnumerable<Product> products, AppDbContext context)
-    {
-        _logger.LogInformation("Upserting products");
-        context.Products.UpsertRange(products).On(p => p.ProductUrl).Run();
-    }
-
     private void ClickCookieBanner(IWebDriver driver)
     {
         var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
@@ -171,7 +152,7 @@ public class RimiWorker : IScrapeWorker
             wait.Until(d => cookieButton.Displayed);
             cookieButton.Click();
         }
-        catch (NoSuchElementException e)
+        catch (NoSuchElementException)
         {
             _logger.LogInformation("Didnt find the cookie element");
         }
@@ -182,6 +163,8 @@ public class RimiWorker : IScrapeWorker
         using var scope = _serviceProvider.CreateScope();
 
         var ctx = scope.ServiceProvider.GetService<AppDbContext>();
+
+        Trace.Assert(ctx is not null);
         var store = ctx.Stores.FirstOrDefault(s => s.Name == "Rimi");
 
         if (store is null)
@@ -191,13 +174,7 @@ public class RimiWorker : IScrapeWorker
             store = ctx.Stores.FirstOrDefault(s => s.Name == "Rimi");
         }
 
+        Trace.Assert(store is not null);
         return store;
-    }
-
-    private IWebDriver CreateDriver()
-    {
-        var options = new FirefoxOptions();
-        options.AddArgument("--headless");
-        return new FirefoxDriver(options);
     }
 }

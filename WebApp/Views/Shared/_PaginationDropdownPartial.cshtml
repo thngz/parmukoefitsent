@@ -1,0 +1,38 @@
+@model WebApp.Pages.IndexModel
+
+<div class="dropdown-menu"
+     aria-labelledby="dropdownMenuButton"
+     hx-get
+     hx-page="Index"
+     hx-target="#results"
+     hx-trigger="change"
+     hx-include="#pagination10,#pagination20,#pagination40">
+    <div class="dropdown-item">
+        <label class="form-check-label">10</label>
+        <input class="form-check-input"
+               id="pagination10"
+               type="radio"
+               checked="checked"
+               value="10"
+               asp-for="PaginationSize"/>
+    </div>
+
+    <div class="dropdown-item">
+        <label class="form-check-label">20</label>
+        <input class="form-check-input"
+               id="pagination20"
+               type="radio"
+               value="20"
+               asp-for="PaginationSize"/>
+    </div>
+
+    <div class="dropdown-item">
+        <label class="form-check-label">40</label>
+        <input class="form-check-input"
+               id="pagination40"
+               type="radio"
+               value="40"
+               asp-for="PaginationSize"/>
+    </div>
+
+</div>
