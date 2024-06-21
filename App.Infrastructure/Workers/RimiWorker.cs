@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using App.DAL;
+using App.DAL.Repositories;
 using App.Infrastructure.Interfaces;
 using App.Infrastructure.Interfaces.ServiceInterfaces;
 using App.Models;
@@ -27,16 +27,13 @@ public class RimiWorker : IScrapeWorker
     private readonly RimiUrl _url = new();
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<RimiWorker> _logger;
-    private readonly IProductService _productService;
     private readonly ISeleniumService _seleniumService;
 
 
-    public RimiWorker(IServiceProvider serviceProvider, ILogger<RimiWorker> logger, IProductService productService,
-        ISeleniumService seleniumService)
+    public RimiWorker(IServiceProvider serviceProvider, ILogger<RimiWorker> logger, ISeleniumService seleniumService)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
-        _productService = productService;
         _seleniumService = seleniumService;
     }
 
@@ -65,17 +62,22 @@ public class RimiWorker : IScrapeWorker
 
         using (var scope = _serviceProvider.CreateScope())
         {
-            var ctx = scope.ServiceProvider.GetService<AppDbContext>();
-            Trace.Assert(ctx is not null);
-
-            var store = _productService.GetStoreForProduct("Rimi", ctx);
+            var productRepo = scope.ServiceProvider.GetService<IRepository<Product>>();
+            var storeRepo = scope.ServiceProvider.GetService<IRepository<Store>>();
+           
+            Trace.Assert(storeRepo is not null);
+            
+            var store = storeRepo.GetEntity("Rimi");
+            
+            Trace.Assert(store is not null);
+            
             var productsOnPage =
-                _productService.GetProductsOnPage(".product-grid__item", CreateProduct, driver, store);
-            var urls = ctx.Products.Select(x => x.ProductUrl);
-            var existingUrls =
-                new HashSet<string>(ctx.Products.Where(x => urls.Contains(x.ProductUrl)).Select(x => x.ProductUrl));
+                _seleniumService.GetProductsOnPage(".product-grid__item", CreateProduct, driver, store);
+           
+            Trace.Assert(productRepo is not null);
+            
+            var existingUrls = productRepo.GetEntityNamesInDb();
             var dbProducts = new List<Product>();
-
             foreach (var product in productsOnPage)
             {
                 if (!existingUrls.Contains(product.ProductUrl))
@@ -88,7 +90,7 @@ public class RimiWorker : IScrapeWorker
                 dbProducts.Add(product);
             }
 
-            _productService.UpsertProducts(dbProducts, ctx);
+            productRepo.UpsertEntities(dbProducts);
         }
 
         driver.Quit();

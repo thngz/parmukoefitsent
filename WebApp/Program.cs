@@ -11,17 +11,20 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString ??
-                      throw new InvalidOperationException("Connection string 'ApplicationDbContext' not found.")).EnableSensitiveDataLogging());
+                      throw new InvalidOperationException("Connection string 'ApplicationDbContext' not found."))
+        .EnableSensitiveDataLogging());
 
-builder.Services.AddDefaultBehaviors();
+builder.Services.AddRepositories();
 builder.Services.AddConfiguredHangfire();
 builder.Services.AddWorkers();
+
+var maxParallelization = builder.Configuration.GetValue<int>("MaxParallelization");
 
 var app = builder.Build();
 
 app.UseHangfireDashboard("/hangfire", new DashboardOptions()
 {
-    Authorization = new []
+    Authorization = new[]
     {
         new HangfireCustomBasicAuthenticationFilter
         {
@@ -37,7 +40,7 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
-app.UseWorker();
+app.UseWorker(maxParallelization);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
