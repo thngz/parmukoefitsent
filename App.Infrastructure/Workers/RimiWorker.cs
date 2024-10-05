@@ -1,8 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using App.DAL.Repositories;
-using App.Infrastructure.Interfaces;
-using App.Infrastructure.Interfaces.ServiceInterfaces;
+using App.Infrastructure.Services;
 using App.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -27,17 +26,17 @@ public class RimiWorker : IScrapeWorker
     private readonly RimiUrl _url = new();
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<RimiWorker> _logger;
-    private readonly ISeleniumService _seleniumService;
+    private readonly SeleniumService _seleniumService;
 
 
-    public RimiWorker(IServiceProvider serviceProvider, ILogger<RimiWorker> logger, ISeleniumService seleniumService)
+    public RimiWorker(IServiceProvider serviceProvider, ILogger<RimiWorker> logger)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
-        _seleniumService = seleniumService;
+        _seleniumService = new SeleniumService();
     }
 
-    public void Work(int maxThreadCount)
+    public async Task Work(int maxThreadCount)
     {
         var initialDriver = _seleniumService.CreateDriver();
         initialDriver.Navigate().GoToUrl(_url.GetUrl(1));
@@ -62,6 +61,7 @@ public class RimiWorker : IScrapeWorker
 
         using (var scope = _serviceProvider.CreateScope())
         {
+            // We need to do this to avoid conflicts when multithreading
             var productRepo = scope.ServiceProvider.GetService<IRepository<Product>>();
             var storeRepo = scope.ServiceProvider.GetService<IRepository<Store>>();
            

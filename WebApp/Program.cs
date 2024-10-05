@@ -1,7 +1,8 @@
-using App.DAL;
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using Microsoft.EntityFrameworkCore;
+using App.DAL;
+using App.Models;
 using WebApp;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +38,15 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions()
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    
+    if (!db.Stores.Any(s => s.Name == "Rimi")) {
+        db.Stores.Add(new Store {Name = "Rimi"});
+    }
+    if (!db.Stores.Any(s => s.Name == "Coop")) {
+        db.Stores.Add(new Store {Name = "Coop"});
+    }
+    
+    db.SaveChanges();
     db.Database.Migrate();
 }
 

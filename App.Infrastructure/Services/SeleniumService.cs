@@ -1,7 +1,5 @@
 using System.Diagnostics;
 using App.DAL;
-using App.Infrastructure.Interfaces;
-using App.Infrastructure.Interfaces.ServiceInterfaces;
 using App.Models;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +8,7 @@ using OpenQA.Selenium.Firefox;
 
 namespace App.Infrastructure.Services;
 
-public class SeleniumService: ISeleniumService
+public class SeleniumService
 {
     public IWebDriver CreateDriver()
     {

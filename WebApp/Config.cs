@@ -1,7 +1,5 @@
 using System.Diagnostics;
 using App.DAL.Repositories;
-using App.Infrastructure.Interfaces;
-using App.Infrastructure.Interfaces.ServiceInterfaces;
 using App.Infrastructure.Services;
 using App.Infrastructure.Workers;
 using App.Models;
@@ -31,19 +29,24 @@ public static class Config
 
     public static void AddWorkers(this IServiceCollection services)
     {
-        services.AddScoped<ISeleniumService, SeleniumService>();
         services.AddScoped<IScrapeWorker, RimiWorker>();
+        services.AddScoped<IScrapeWorker, SelverWorker>();
+        services.AddScoped<IScrapeWorker, CoopWorker>();
     }
 
     public static void UseWorker(this WebApplication app, int maxParallelization)
     {
         using var scope = app.Services.CreateScope();
-        var worker = scope.ServiceProvider.GetService<IScrapeWorker>();
-        Trace.Assert(worker is not null);
-
-        RecurringJob.AddOrUpdate(
-            "scrape_sites",
-            () => worker.Work(maxParallelization),
-            Cron.Daily);
+        var workers = scope.ServiceProvider.GetServices<IScrapeWorker>();
+        Trace.Assert(workers is not null);
+        
+        foreach (var worker in workers) {
+            
+            RecurringJob.AddOrUpdate(
+                worker.ToString(),
+                () => worker.Work(maxParallelization),
+                Cron.Daily);
+            
+        }
     }
 }
