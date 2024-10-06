@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using App.DAL.Repositories;
-using App.Infrastructure.Services;
-using App.Infrastructure.Workers;
-using App.Models;
+using Infrastructure.Services;
+using Infrastructure.Repositories;
+using Infrastructure.Workers;
+using Models;
 using Hangfire;
 
 namespace WebApp;

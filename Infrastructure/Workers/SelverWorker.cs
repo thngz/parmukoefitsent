@@ -1,4 +1,4 @@
-namespace App.Infrastructure.Workers;
+namespace Infrastructure.Workers;
 
 public class SelverWorker: IScrapeWorker
 {

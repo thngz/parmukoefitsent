@@ -1,6 +1,6 @@
-using App.Models;
+using Models;
 
-namespace App.Infrastructure.Workers;
+namespace Infrastructure.Workers;
 
 public interface IScrapeWorker
 {

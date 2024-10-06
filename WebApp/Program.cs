@@ -1,8 +1,8 @@
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using Microsoft.EntityFrameworkCore;
-using App.DAL;
-using App.Models;
+using Models;
+using Infrastructure.Repositories;
 using WebApp;
 
 var builder = WebApplication.CreateBuilder(args);

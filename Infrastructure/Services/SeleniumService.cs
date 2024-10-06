@@ -1,12 +1,12 @@
 using System.Diagnostics;
-using App.DAL;
-using App.Models;
+using Models;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
+using Infrastructure.Repositories;
 
-namespace App.Infrastructure.Services;
+namespace Infrastructure.Services;
 
 public class SeleniumService
 {

@@ -1,8 +1,8 @@
-using App.Models;
+using Models;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace App.DAL.Repositories;
+namespace Infrastructure.Repositories;
 
 public class ProductRepository(AppDbContext context) : IRepository<Product>
 {

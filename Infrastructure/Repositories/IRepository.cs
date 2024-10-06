@@ -1,4 +1,4 @@
-namespace App.DAL.Repositories;
+namespace Infrastructure.Repositories;
 
 public interface IRepository<TEntity>
 {

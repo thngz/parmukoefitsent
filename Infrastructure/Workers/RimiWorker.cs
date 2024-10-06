@@ -1,14 +1,14 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using App.DAL.Repositories;
-using App.Infrastructure.Services;
-using App.Models;
+using Infrastructure.Services;
+using Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using Infrastructure.Repositories;
 
-namespace App.Infrastructure.Workers;
+namespace Infrastructure.Workers;
 
 public class RimiUrl
 {

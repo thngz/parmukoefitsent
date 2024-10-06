@@ -1,6 +1,6 @@
 using System.Collections.Specialized;
-using App.DAL;
-using App.Models;
+using Models;
+using Infrastructure.Repositories;
 using Htmx;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -31,7 +31,6 @@ public class IndexModel : PageModel
     public async Task<IActionResult> OnGet()
     {
         CurrentPage = CurrentPage == 0 ? 1 : CurrentPage;
-
         var products = from p in _ctx.Products
             join store in _ctx.Stores on p.Store equals store
             select new Product

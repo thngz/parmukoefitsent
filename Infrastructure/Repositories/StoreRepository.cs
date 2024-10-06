@@ -1,6 +1,6 @@
-using App.Models;
+using Models;
 
-namespace App.DAL.Repositories;
+namespace Infrastructure.Repositories;
 
 public class StoreRepository(AppDbContext context) : IRepository<Store>
 {
